@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { personalData } from '../data/portfolioData';
 import { Mail, MapPin, Send, CheckCircle2, AlertCircle, Sparkles, Building2 } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
 interface ContactFormData {
   name: string;
@@ -86,11 +87,16 @@ export const Contact: React.FC = () => {
     setErrors(validationErrors);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Mark all as touched
-    setTouched({ name: true, email: true, subject: true, message: true });
+    setTouched({
+      name: true,
+      email: true,
+      subject: true,
+      message: true
+    });
+
     const validationErrors = validate(formData);
     setErrors(validationErrors);
 
@@ -98,21 +104,47 @@ export const Contact: React.FC = () => {
       return;
     }
 
-    // Frontend demo transmission only (No database connected)
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
+
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .insert([
+          {
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            subject: formData.subject.trim(),
+            message: formData.message.trim()
+          }
+        ]);
+
+      if (error) {
+        throw error;
+      }
+
       setIsSuccess(true);
-      setFormData({ name: '', email: '', subject: '', message: '' });
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
       setTouched({});
       setErrors({});
-    }, 1000);
+
+    } catch (error) {
+      console.error('Supabase error:', error);
+      alert('Message could not be sent. Please try again.');
+
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <section id="contact" className="py-24 relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="section-pill">
@@ -129,10 +161,10 @@ export const Contact: React.FC = () => {
 
         {/* Contact Layout Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Left Column: Direct Contact Info Cards */}
           <div className="lg:col-span-5 flex flex-col gap-6">
-            
+
             <div className="portfolio-card p-6 sm:p-8">
               <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">
                 Contact Information
@@ -142,7 +174,7 @@ export const Contact: React.FC = () => {
               </p>
 
               <div className="space-y-6">
-                
+
                 {/* Full Name & Title */}
                 <div className="flex items-start gap-4">
                   <div className="p-3 rounded-xl bg-purple-100 dark:bg-purple-950/60 text-purple-600 dark:text-purple-300 flex-shrink-0">
@@ -204,12 +236,12 @@ export const Contact: React.FC = () => {
 
           </div>
 
-          {/* Right Column: Contact Form with Validation */}
+          {/* Right Column: Contact Form with Validation & Supabase Submission */}
           <div className="lg:col-span-7">
             <div className="portfolio-card p-6 sm:p-8">
-              
+
               {isSuccess ? (
-                /* Frontend Demonstration Success Banner */
+                /* Success Message After Successful Submission */
                 <div className="py-12 flex flex-col items-center text-center">
                   <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-4 border border-emerald-300 dark:border-emerald-800 shadow-sm">
                     <CheckCircle2 className="w-8 h-8" />
@@ -218,11 +250,12 @@ export const Contact: React.FC = () => {
                     Message Sent Successfully!
                   </h3>
                   <p className="text-sm text-slate-600 dark:text-slate-300 max-w-md mb-6 leading-relaxed">
-                    Thank you for reaching out. This is a frontend demonstration; your message details have passed validation cleanly.
+                    Thank you for reaching out. Your message has been received and saved successfully. I will get back to you shortly.
                   </p>
                   <button
+                    type="button"
                     onClick={() => setIsSuccess(false)}
-                    className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 shadow-sm transition-colors"
+                    className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 shadow-sm transition-colors cursor-pointer"
                   >
                     Send Another Message
                   </button>
@@ -233,10 +266,10 @@ export const Contact: React.FC = () => {
                     Send a Message
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-                    Fill out the form below. All fields have frontend validation.
+                    Fill out the form below to get in touch. All fields are validated.
                   </p>
 
-                  {/* Name Field */}
+                  {/* Name Input Field */}
                   <div>
                     <label htmlFor="name" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                       Full Name <span className="text-rose-500">*</span>
@@ -249,11 +282,10 @@ export const Contact: React.FC = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g., Alex Johnson"
-                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${
-                        errors.name && touched.name
+                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${errors.name && touched.name
                           ? 'border-rose-500 focus:ring-rose-500'
                           : 'border-slate-200 dark:border-navy-700 focus:border-purple-brand focus:ring-purple-brand/20'
-                      } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
+                        } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
                     />
                     {errors.name && touched.name && (
                       <p className="mt-1.5 flex items-center gap-1 text-xs text-rose-500">
@@ -263,7 +295,7 @@ export const Contact: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Email Field */}
+                  {/* Email Input Field */}
                   <div>
                     <label htmlFor="email" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                       Email Address <span className="text-rose-500">*</span>
@@ -276,11 +308,10 @@ export const Contact: React.FC = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g., alex@company.com"
-                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${
-                        errors.email && touched.email
+                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${errors.email && touched.email
                           ? 'border-rose-500 focus:ring-rose-500'
                           : 'border-slate-200 dark:border-navy-700 focus:border-purple-brand focus:ring-purple-brand/20'
-                      } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
+                        } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
                     />
                     {errors.email && touched.email && (
                       <p className="mt-1.5 flex items-center gap-1 text-xs text-rose-500">
@@ -290,7 +321,7 @@ export const Contact: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Subject Field */}
+                  {/* Subject Input Field */}
                   <div>
                     <label htmlFor="subject" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
                       Subject <span className="text-rose-500">*</span>
@@ -303,11 +334,10 @@ export const Contact: React.FC = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g., Software Developer Opportunity / Project Inquiry"
-                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${
-                        errors.subject && touched.subject
+                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${errors.subject && touched.subject
                           ? 'border-rose-500 focus:ring-rose-500'
                           : 'border-slate-200 dark:border-navy-700 focus:border-purple-brand focus:ring-purple-brand/20'
-                      } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
+                        } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all`}
                     />
                     {errors.subject && touched.subject && (
                       <p className="mt-1.5 flex items-center gap-1 text-xs text-rose-500">
@@ -317,7 +347,7 @@ export const Contact: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Message Field */}
+                  {/* Message Textarea */}
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label htmlFor="message" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
@@ -335,11 +365,10 @@ export const Contact: React.FC = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="Write your message here..."
-                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${
-                        errors.message && touched.message
+                      className={`w-full px-4 py-3 rounded-xl text-sm bg-slate-50 dark:bg-navy-950 border ${errors.message && touched.message
                           ? 'border-rose-500 focus:ring-rose-500'
                           : 'border-slate-200 dark:border-navy-700 focus:border-purple-brand focus:ring-purple-brand/20'
-                      } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all resize-y`}
+                        } text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 transition-all resize-y`}
                     />
                     {errors.message && touched.message && (
                       <p className="mt-1.5 flex items-center gap-1 text-xs text-rose-500">
@@ -349,16 +378,16 @@ export const Contact: React.FC = () => {
                     )}
                   </div>
 
-                  {/* Submit Button */}
+                  {/* Send Message Submit Button with Loading State */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-brand to-indigo-brand hover:from-purple-dark hover:to-indigo-600 shadow-md shadow-purple-brand/25 transition-all duration-200 disabled:opacity-70"
+                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-purple-brand to-indigo-brand hover:from-purple-dark hover:to-indigo-600 shadow-md shadow-purple-brand/25 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
                   >
                     {isSubmitting ? (
                       <>
                         <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
-                        <span>Validating & Sending...</span>
+                        <span>Sending Message...</span>
                       </>
                     ) : (
                       <>
