@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   GLOBAL CUSTOM STYLES & SUBTLE ANIMATIONS
+   ========================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  body {
+    @apply transition-colors duration-300;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100 dark:bg-navy-950;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 dark:bg-navy-700 rounded-full hover:bg-purple-brand/60;
+  }
+}
+
+/* Background Ambient Lighting */
+.ambient-glow-mesh {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(120px);
+  opacity: 0.15;
+  transition: opacity 0.5s ease;
+}
+
+.dark .ambient-orb {
+  opacity: 0.22;
+}
+
+.ambient-orb-1 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+  top: -120px;
+  left: -100px;
+}
+
+.ambient-orb-2 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+  top: 35%;
+  right: -150px;
+}
+
+.ambient-orb-3 {
+  width: 450px;
+  height: 450px;
+  background: radial-gradient(circle, #3b82f6 0%, transparent 70%);
+  bottom: 5%;
+  left: 15%;
+}
+
+/* Subtle Grid Texture */
+.bg-grid-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dark .bg-grid-overlay {
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Card Styling Utilities */
+.portfolio-card {
+  @apply bg-white dark:bg-navy-900/80 border border-slate-200 dark:border-navy-700/60 rounded-2xl shadow-sm dark:shadow-card-dark backdrop-blur-md transition-all duration-300;
+}
+
+.portfolio-card:hover {
+  @apply border-purple-brand/50 dark:border-purple-brand/40 shadow-md dark:shadow-glow-purple -translate-y-1;
+}
+
+/* Glowing text */
+.gradient-heading {
+  @apply bg-gradient-to-r from-purple-brand via-indigo-brand to-purple-400 bg-clip-text text-transparent;
+}
+
+.dark-gradient-heading {
+  @apply bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400 bg-clip-text text-transparent;
+}
+
+/* Section Title Pill */
+.section-pill {
+  @apply inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold tracking-wider uppercase bg-purple-50 text-purple-700 border border-purple-200/60 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/50 mb-3;
+}
