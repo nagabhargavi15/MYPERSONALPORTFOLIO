@@ -69,6 +69,7 @@ export const educationList: EducationItem[] = [
   {
     id: "edu-2",
     degree: "Intermediate (10+2)",
+    institution: "SRIMEDHA JUNIOR COLLEGE",
     cgpaOrGrade: "Result: 950 Marks",
     description: "Completed intermediate education with academic distinction scoring 950 marks.",
     isCompleted: true
@@ -76,6 +77,7 @@ export const educationList: EducationItem[] = [
   {
     id: "edu-3",
     degree: "Secondary School Certificate (SSC)",
+    institution: "AKSHAYA IIT FOUNDATION SCHOOL",
     cgpaOrGrade: "Result: 10 GPA",
     description: "Completed secondary school certification with a perfect academic score of 10 GPA.",
     isCompleted: true
